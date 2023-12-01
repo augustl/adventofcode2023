@@ -6,7 +6,7 @@
   (re-seq #"\d" s))
 
 (def numbers ["one" "two" "three" "four" "five" "six" "seven" "eight" "nine"])
-(def number-pattern (re-pattern (str (s/join "|" numbers) "|\\d")))
+(def number-pattern (re-pattern (str "^(" (s/join "|" numbers) "|\\d)")))
 (def number-lookup (zipmap numbers (rest (range))))
 
 (defn subs-matches [re s]
@@ -14,15 +14,16 @@
          res []]
     (if (seq s)
       (let [m (re-matcher re s)]
-        (if (.find m)
-          (recur (subs s (inc (.start m))) (conj res (.group m)))
-          (recur (subs s 1) res)))
+        (recur (subs s 1) (if (.find m)
+                            (conj res (.group m))
+                            res)))
       res)))
 
 (comment
   (= ["eight" "three"] (subs-matches number-pattern "eighthree"))
   (= ["eight" "three"] (subs-matches number-pattern "eightthree"))
-  (= ["eight" "three" "5"] (subs-matches number-pattern "eighthree5")))
+  (= ["eight" "three" "5"] (subs-matches number-pattern "eighthree5"))
+  (= ["one" "eight"] (subs-matches number-pattern "butoneight")))
 
 (defn parse-2 [s]
   (->> (subs-matches number-pattern s)
@@ -41,12 +42,12 @@
 
 (comment
   (with-open [r (io/reader (io/resource "adventofcode2023/day_1.txt"))]
-    (solve parse-1 (line-seq r)))
+    (= 54916 (solve parse-1 (line-seq r))))
 
   (= 142 (solve parse-1 ["1abc2" "pqr3stu8vwx" "a1b2c3d4e5f" "treb7uchet"]))
 
   (with-open [r (io/reader (io/resource "adventofcode2023/day_1.txt"))]
-    (solve parse-2 (line-seq r)))
+    (= 54728 (solve parse-2 (line-seq r))))
 
 
   (= 281 (solve parse-2 ["two1nine" "eightwothree" "abcone2threexyz" "xtwone3four" "4nineeightseven2" "zoneight234" "7pqrstsixteen"]))

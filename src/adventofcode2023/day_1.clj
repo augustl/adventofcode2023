@@ -18,13 +18,10 @@
   (= [3 "one"] (re-find-idx number-pattern "abcone")))
 
 (defn subs-matches [re s]
-  (loop [s s
-         res []]
-    (if (seq s)
-      (if-let [[idx match] (re-find-idx re s)]
-        (recur (subs s (inc idx)) (conj res match))
-        (recur (subs s 1) res))
-      res)))
+  (letfn [(subs-match [s]
+            (when-let [[idx match] (re-find-idx re s)]
+              (cons match (lazy-seq (subs-match (subs s (inc idx)))))))]
+    (subs-match s)))
 
 (comment
   (= ["eight" "three"] (subs-matches number-pattern "eighthree"))

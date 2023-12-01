@@ -17,8 +17,7 @@
         (if (.find m)
           (recur (subs s (inc (.start m))) (conj res (.group m)))
           (recur (subs s 1) res)))
-      res))
-  )
+      res)))
 
 (comment
   (= ["eight" "three"] (subs-matches number-pattern "eighthree"))

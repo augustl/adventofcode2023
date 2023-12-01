@@ -6,7 +6,7 @@
   (re-seq #"\d" s))
 
 (def numbers ["one" "two" "three" "four" "five" "six" "seven" "eight" "nine"])
-(def number-pattern (re-pattern (str "^(" (s/join "|" numbers) "|\\d)")))
+(def number-pattern (re-pattern (str (s/join "|" numbers) "|\\d")))
 (def number-lookup (zipmap numbers (rest (range))))
 
 (defn subs-matches [re s]
@@ -14,9 +14,9 @@
          res []]
     (if (seq s)
       (let [m (re-matcher re s)]
-        (recur (subs s 1) (if (.find m)
-                            (conj res (.group m))
-                            res)))
+        (if (.find m)
+          (recur (subs s (inc (.start m))) (conj res (.group m)))
+          (recur (subs s 1) res)))
       res)))
 
 (comment

@@ -9,14 +9,21 @@
 (def number-pattern (re-pattern (str (s/join "|" numbers) "|\\d")))
 (def number-lookup (zipmap numbers (rest (range))))
 
+(defn re-find-idx [re s]
+  (let [m (re-matcher re s)]
+    (when (.find m)
+      [(.start m) (.group m)])))
+
+(comment
+  (= [3 "one"] (re-find-idx number-pattern "abcone")))
+
 (defn subs-matches [re s]
   (loop [s s
          res []]
     (if (seq s)
-      (let [m (re-matcher re s)]
-        (if (.find m)
-          (recur (subs s (inc (.start m))) (conj res (.group m)))
-          (recur (subs s 1) res)))
+      (if-let [[idx match] (re-find-idx re s)]
+        (recur (subs s (inc idx)) (conj res match))
+        (recur (subs s 1) res))
       res)))
 
 (comment
